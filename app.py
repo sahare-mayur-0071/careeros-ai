@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 from dotenv import load_dotenv
 
 from agents.orchestrator import OrchestratorAgent
-from utils.pdf_parser import parse_pdf
+from utils.file_parser import parse_pdf, parse_image
 from utils.storage import load_memory, save_memory
 
 load_dotenv()
@@ -78,7 +78,7 @@ with st.sidebar:
          "Cloud Engineer", "DevOps Engineer", "Cybersecurity Analyst", "Product Manager"]
     )
 
-    uploaded_file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
+    uploaded_file = st.file_uploader("Upload Resume (PDF or Image)", type=["pdf", "png", "jpg", "jpeg"])
     
     if st.button("Launch CareerOS Pipeline", type="primary", use_container_width=True):
         if not os.getenv("GEMINI_API_KEY"):
@@ -87,12 +87,18 @@ with st.sidebar:
             st.error("Please upload a resume.")
         else:
             with st.spinner("Booting CareerOS AI..."):
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                file_ext = uploaded_file.name.split('.')[-1].lower()
+                with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_ext}") as tmp:
                     tmp.write(uploaded_file.getvalue())
                     tmp_path = tmp.name
                 
                 try:
-                    resume_text = parse_pdf(tmp_path)
+                    if file_ext == "pdf":
+                        resume_text = parse_pdf(tmp_path)
+                    elif file_ext in ["png", "jpg", "jpeg"]:
+                        resume_text = parse_image(tmp_path)
+                    else:
+                        resume_text = ""
                     
                     status_placeholder = st.empty()
                     progress_bar = st.progress(0)
