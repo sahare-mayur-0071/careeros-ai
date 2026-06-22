@@ -9,7 +9,7 @@ from utils.logger import setup_logger
 load_dotenv()
 logger = setup_logger(__name__)
 
-def get_llm_response(prompt: str, model_name: str = "gemini-1.5-flash", temperature: float = 0.2, expect_json: bool = True):
+def get_llm_response(prompt: str, model_name: str = "gemini-2.5-flash-lite", temperature: float = 0.2, expect_json: bool = True):
     try:
         client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
         
