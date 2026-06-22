@@ -28,8 +28,10 @@ class OrchestratorAgent:
     def run_pipeline(self, resume_text: str, target_role: str, status_callback=None) -> dict:
         """Executes the full CareerOS agent pipeline."""
         session_data = {}
+        import time
         
         def update_status(msg, progress):
+            time.sleep(3) # Pace requests to avoid Gemini Free Tier 429 errors
             if status_callback:
                 status_callback(msg, progress)
 
