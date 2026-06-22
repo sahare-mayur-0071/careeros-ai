@@ -126,7 +126,7 @@ with st.sidebar:
 # --- Main Dashboard ---
 if st.session_state.session_data:
     data = st.session_state.session_data
-    scores = data.get('scores', {})
+    scores = data.get('scores') if isinstance(data.get('scores'), dict) else {}
     
     st.markdown("<h1 style='text-align: center; margin-bottom: 2rem;'>CareerOS Executive Dashboard</h1>", unsafe_allow_html=True)
     
@@ -151,78 +151,87 @@ if st.session_state.session_data:
         col1, col2 = st.columns(2)
         with col1:
             st.markdown("<h3 class='section-header'>Resume Intelligence</h3>", unsafe_allow_html=True)
-            res = data.get('parsed_resume', {})
+            res = data.get('parsed_resume') if isinstance(data.get('parsed_resume'), dict) else {}
             st.write("**Summary:**", res.get('summary', ''))
             st.write("**Extracted Skills:**", ", ".join(res.get('skills', [])))
         with col2:
             st.markdown("<h3 class='section-header'>ATS Optimization</h3>", unsafe_allow_html=True)
-            ats = data.get('ats_analysis', {})
-            st.error("**Missing Keywords:** " + ", ".join(ats.get('missing_keywords', [])))
-            for imp in ats.get('recommended_improvements', []):
+            ats = data.get('ats_analysis') if isinstance(data.get('ats_analysis'), dict) else {}
+            st.error("**Missing Keywords:** " + ", ".join(ats.get('missing_keywords', []) if isinstance(ats.get('missing_keywords'), list) else []))
+            for imp in (ats.get('recommended_improvements', []) if isinstance(ats.get('recommended_improvements'), list) else []):
                 st.info(imp)
                 
     with tabs[1]: # Skills & Jobs
         col1, col2 = st.columns(2)
         with col1:
             st.markdown("<h3 class='section-header'>Skill Gap Analysis</h3>", unsafe_allow_html=True)
-            gaps = data.get('skill_gaps', {})
+            gaps = data.get('skill_gaps') if isinstance(data.get('skill_gaps'), dict) else {}
             st.warning("**Critical Gaps:**")
-            for g in gaps.get('critical_gaps', []): st.write(f"- {g}")
+            for g in (gaps.get('critical_gaps', []) if isinstance(gaps.get('critical_gaps'), list) else []): st.write(f"- {g}")
         with col2:
             st.markdown("<h3 class='section-header'>Top Job Matches</h3>", unsafe_allow_html=True)
-            jobs = data.get('job_matches', {}).get('top_matches', [])
+            job_matches_dict = data.get('job_matches') if isinstance(data.get('job_matches'), dict) else {}
+            jobs = job_matches_dict.get('top_matches') if isinstance(job_matches_dict.get('top_matches'), list) else []
             for j in jobs:
-                st.success(f"**{j.get('role')} ({j.get('match_percentage')}%)**\\n{j.get('explanation')}")
+                if isinstance(j, dict):
+                    st.success(f"**{j.get('role')} ({j.get('match_percentage')}%)**\\n{j.get('explanation')}")
                 
     with tabs[2]: # Learning Plan
         st.markdown("<h3 class='section-header'>90-Day Learning Roadmap</h3>", unsafe_allow_html=True)
-        rm = data.get('roadmap', {})
+        rm = data.get('roadmap') if isinstance(data.get('roadmap'), dict) else {}
         c1, c2, c3 = st.columns(3)
         for i, period in enumerate(['30_days', '60_days', '90_days']):
             with [c1, c2, c3][i]:
-                plan = rm.get(f'roadmap_{period}', {})
+                plan = rm.get(f'roadmap_{period}') if isinstance(rm.get(f'roadmap_{period}'), dict) else {}
                 st.write(f"### Day {period.split('_')[0]}")
                 st.write(f"**Focus:** {plan.get('focus', '')}")
                 st.write("**Goals:**")
-                for g in plan.get('weekly_goals', []): st.write(f"- {g}")
+                for g in (plan.get('weekly_goals', []) if isinstance(plan.get('weekly_goals'), list) else []): st.write(f"- {g}")
         
         st.markdown("### Recommended Certifications")
-        certs = data.get('certifications', {}).get('recommendations', [])
+        certs_dict = data.get('certifications') if isinstance(data.get('certifications'), dict) else {}
+        certs = certs_dict.get('recommendations') if isinstance(certs_dict.get('recommendations'), list) else []
         for c in certs:
-            st.write(f"🏆 **{c.get('name')}** ({c.get('provider')}) - {c.get('reason')}")
+            if isinstance(c, dict):
+                st.write(f"🏆 **{c.get('name')}** ({c.get('provider')}) - {c.get('reason')}")
 
     with tabs[3]: # Portfolio & Brand
         col1, col2 = st.columns(2)
         with col1:
             st.markdown("<h3 class='section-header'>Portfolio Builder</h3>", unsafe_allow_html=True)
-            port = data.get('portfolio', {})
-            for p in port.get('project_ideas', []):
-                with st.expander(f"💡 {p.get('title')}"):
-                    st.write(p.get('description'))
-                    st.write("**Stack:**", ", ".join(p.get('tech_stack', [])))
+            port = data.get('portfolio') if isinstance(data.get('portfolio'), dict) else {}
+            for p in (port.get('project_ideas', []) if isinstance(port.get('project_ideas'), list) else []):
+                if isinstance(p, dict):
+                    with st.expander(f"💡 {p.get('title')}"):
+                        st.write(p.get('description'))
+                        stack = p.get('tech_stack', [])
+                        st.write("**Stack:**", ", ".join(stack if isinstance(stack, list) else []))
         with col2:
             st.markdown("<h3 class='section-header'>Personal Branding</h3>", unsafe_allow_html=True)
-            brand = data.get('branding', {})
+            brand = data.get('branding') if isinstance(data.get('branding'), dict) else {}
             st.text_area("LinkedIn Headline", brand.get('linkedin_headline', ''), height=70)
             st.text_area("LinkedIn About", brand.get('linkedin_about', ''), height=150)
 
     with tabs[4]: # Interview Prep
         st.markdown("<h3 class='section-header'>Interview Coach</h3>", unsafe_allow_html=True)
-        prep = data.get('interview_prep', {})
+        prep = data.get('interview_prep') if isinstance(data.get('interview_prep'), dict) else {}
         
         qt1, qt2, qt3 = st.tabs(["Technical", "Behavioral", "Project Discussion"])
         with qt1:
-            for q in prep.get('technical_questions', []):
-                with st.expander(q.get('question', '')):
-                    for pt in q.get('expected_answer_points', []): st.write(f"- {pt}")
+            for q in (prep.get('technical_questions', []) if isinstance(prep.get('technical_questions'), list) else []):
+                if isinstance(q, dict):
+                    with st.expander(q.get('question', '')):
+                        for pt in (q.get('expected_answer_points', []) if isinstance(q.get('expected_answer_points'), list) else []): st.write(f"- {pt}")
         with qt2:
-            for q in prep.get('behavioral_questions', []):
-                with st.expander(q.get('question', '')):
-                    for pt in q.get('expected_answer_points', []): st.write(f"- {pt}")
+            for q in (prep.get('behavioral_questions', []) if isinstance(prep.get('behavioral_questions'), list) else []):
+                if isinstance(q, dict):
+                    with st.expander(q.get('question', '')):
+                        for pt in (q.get('expected_answer_points', []) if isinstance(q.get('expected_answer_points'), list) else []): st.write(f"- {pt}")
         with qt3:
-            for q in prep.get('project_discussion_questions', []):
-                with st.expander(q.get('question', '')):
-                    for pt in q.get('expected_answer_points', []): st.write(f"- {pt}")
+            for q in (prep.get('project_discussion_questions', []) if isinstance(prep.get('project_discussion_questions'), list) else []):
+                if isinstance(q, dict):
+                    with st.expander(q.get('question', '')):
+                        for pt in (q.get('expected_answer_points', []) if isinstance(q.get('expected_answer_points'), list) else []): st.write(f"- {pt}")
 
     # Sidebar Download
     report_path = data.get('report_path')

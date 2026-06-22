@@ -43,7 +43,7 @@ class CareerReportAgent(BaseAgent):
         
         # Scores
         flowables.append(Paragraph("Career Readiness Overview", h2_style))
-        scores = session_data.get('scores', {})
+        scores = session_data.get('scores') if isinstance(session_data.get('scores'), dict) else {}
         flowables.append(Paragraph(f"<b>Career Readiness Score:</b> {scores.get('readiness', 'N/A')}/100", normal_style))
         flowables.append(Paragraph(f"<b>ATS Score:</b> {scores.get('ats', 'N/A')}/100", normal_style))
         flowables.append(Paragraph(f"<b>Top Job Match Score:</b> {scores.get('job_match', 'N/A')}/100", normal_style))
@@ -59,32 +59,34 @@ class CareerReportAgent(BaseAgent):
             flowables.append(KeepTogether(story))
             
         # ATS feedback
-        ats = session_data.get('ats_analysis', {})
-        add_section("ATS Improvement Suggestions", ats.get('recommended_improvements', []))
+        ats = session_data.get('ats_analysis') if isinstance(session_data.get('ats_analysis'), dict) else {}
+        add_section("ATS Improvement Suggestions", ats.get('recommended_improvements', []) if isinstance(ats.get('recommended_improvements'), list) else [])
         
         # Job matches
-        jobs = session_data.get('job_matches', {}).get('top_matches', [])
-        job_lines = [f"{j.get('role')} ({j.get('match_percentage')}%) - {j.get('explanation')}" for j in jobs]
+        job_matches_dict = session_data.get('job_matches') if isinstance(session_data.get('job_matches'), dict) else {}
+        jobs = job_matches_dict.get('top_matches') if isinstance(job_matches_dict.get('top_matches'), list) else []
+        job_lines = [f"{j.get('role')} ({j.get('match_percentage')}%) - {j.get('explanation')}" for j in jobs if isinstance(j, dict)]
         add_section("Top Career Matches", job_lines)
         
         # Skill Gaps
-        gaps = session_data.get('skill_gaps', {})
-        add_section("Missing Skills to Learn", gaps.get('missing_skills', []))
-        add_section("Learning Recommendations", gaps.get('learning_recommendations', []))
+        gaps = session_data.get('skill_gaps') if isinstance(session_data.get('skill_gaps'), dict) else {}
+        add_section("Missing Skills to Learn", gaps.get('missing_skills', []) if isinstance(gaps.get('missing_skills'), list) else [])
+        add_section("Learning Recommendations", gaps.get('learning_recommendations', []) if isinstance(gaps.get('learning_recommendations'), list) else [])
         
         # Portfolio
-        portfolio = session_data.get('portfolio', {})
-        projects = portfolio.get('project_ideas', [])
-        proj_lines = [f"{p.get('title')}: {p.get('description')}" for p in projects]
+        portfolio = session_data.get('portfolio') if isinstance(session_data.get('portfolio'), dict) else {}
+        projects = portfolio.get('project_ideas') if isinstance(portfolio.get('project_ideas'), list) else []
+        proj_lines = [f"{p.get('title')}: {p.get('description')}" for p in projects if isinstance(p, dict)]
         add_section("Recommended Portfolio Projects", proj_lines)
         
         # Certifications
-        certs = session_data.get('certifications', {}).get('recommendations', [])
-        cert_lines = [f"{c.get('name')} by {c.get('provider')} - {c.get('reason')}" for c in certs]
+        certs_dict = session_data.get('certifications') if isinstance(session_data.get('certifications'), dict) else {}
+        certs = certs_dict.get('recommendations') if isinstance(certs_dict.get('recommendations'), list) else []
+        cert_lines = [f"{c.get('name')} by {c.get('provider')} - {c.get('reason')}" for c in certs if isinstance(c, dict)]
         add_section("Recommended Certifications", cert_lines)
         
         # Branding
-        branding = session_data.get('branding', {})
+        branding = session_data.get('branding') if isinstance(session_data.get('branding'), dict) else {}
         brand_lines = [
             f"<b>LinkedIn Headline:</b> {branding.get('linkedin_headline', '')}",
             f"<b>LinkedIn About:</b> {branding.get('linkedin_about', '')}"

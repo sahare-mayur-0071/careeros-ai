@@ -50,7 +50,7 @@ class OrchestratorAgent:
         session_data['job_matches'] = job_matches
 
         update_status("Learning Roadmap Agent building plan...", 50)
-        missing_skills = skill_gaps.get('missing_skills', []) if skill_gaps else []
+        missing_skills = skill_gaps.get('missing_skills', []) if isinstance(skill_gaps, dict) else []
         roadmap = self.roadmap_agent.generate(missing_skills, target_role)
         session_data['roadmap'] = roadmap
 
@@ -59,7 +59,7 @@ class OrchestratorAgent:
         session_data['interview_prep'] = interview_prep
 
         update_status("Certification Advisor checking credentials...", 70)
-        acquired_skills = skill_gaps.get('acquired_skills', []) if skill_gaps else []
+        acquired_skills = skill_gaps.get('acquired_skills', []) if isinstance(skill_gaps, dict) else []
         certs = self.cert_agent.recommend(target_role, acquired_skills, missing_skills)
         session_data['certifications'] = certs
 
@@ -72,12 +72,16 @@ class OrchestratorAgent:
         session_data['branding'] = branding
 
         update_status("Calculating Career Readiness Score...", 95)
-        ats_score = ats_analysis.get('ats_score', 0) if ats_analysis else 0
+        ats_score = ats_analysis.get('ats_score', 0) if isinstance(ats_analysis, dict) else 0
         top_match = 0
-        if job_matches and job_matches.get('top_matches'):
-            top_match = job_matches['top_matches'][0].get('match_percentage', 0)
-        gap_count = len(missing_skills)
-        project_count = len(parsed_resume.get('projects', [])) if parsed_resume else 0
+        if isinstance(job_matches, dict) and isinstance(job_matches.get('top_matches'), list) and len(job_matches['top_matches']) > 0:
+            first_match = job_matches['top_matches'][0]
+            if isinstance(first_match, dict):
+                top_match = first_match.get('match_percentage', 0)
+        gap_count = len(missing_skills) if isinstance(missing_skills, list) else 0
+        
+        proj_list = parsed_resume.get('projects') if isinstance(parsed_resume, dict) else []
+        project_count = len(proj_list) if isinstance(proj_list, list) else 0
         
         readiness_score = calculate_career_readiness(ats_score, top_match, gap_count, project_count)
         
