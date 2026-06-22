@@ -3,6 +3,7 @@ import json
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
+import streamlit as st
 from utils.logger import setup_logger
 
 load_dotenv()
@@ -41,4 +42,5 @@ def get_llm_response(prompt: str, model_name: str = "gemini-2.5-flash", temperat
         return text_response
     except Exception as e:
         logger.error(f"LLM API error: {e}")
+        st.error(f"LLM API error: {e}")
         return None
