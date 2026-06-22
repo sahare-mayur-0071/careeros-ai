@@ -70,16 +70,17 @@ CareerOS utilizes an **Orchestrator Agent** to manage a sequential pipeline:
 
 ---
 
-## 📸 Screenshots
+## 📸 Gallery
 
-### Dashboard Overview
-![Dashboard Overview](screenshots/dashboard_overview.png)
+<p align="center">
+  <img src="thumbnail.png" alt="CareerOS Thumbnail" width="600"/>
+</p>
 
-### Radar Charts & Metrics
-![Radar Charts](screenshots/radar_charts.png)
+### 🧠 Multi-Agent Architecture
+![Multi-Agent Orchestrator](gallery_architecture.png)
 
-### PDF Report Output
-![PDF Report](screenshots/pdf_report.png)
+### 🗺️ Career Learning Roadmap
+![Career Roadmap](gallery_roadmap.png)
 
 ---
 
