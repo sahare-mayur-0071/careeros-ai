@@ -26,7 +26,7 @@ def parse_image(image_path: str) -> str:
         client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
         image = Image.open(image_path)
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-1.5-flash',
             contents=['Extract all the text from this resume precisely. Output only the extracted text.', image]
         )
         return response.text
