@@ -1,35 +1,41 @@
 import os
 import json
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 from utils.logger import setup_logger
 
 load_dotenv()
 logger = setup_logger(__name__)
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-def get_llm_response(prompt: str, model_name: str = "gemini-1.5-flash", temperature: float = 0.2, expect_json: bool = True):
+def get_llm_response(prompt: str, model_name: str = "gemini-2.5-flash", temperature: float = 0.2, expect_json: bool = True):
     try:
-        model = genai.GenerativeModel(model_name)
-        generation_config = genai.types.GenerationConfig(temperature=temperature)
+        client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        
+        config_kwargs = {"temperature": temperature}
         if expect_json:
-            generation_config.response_mime_type = "application/json"
+            config_kwargs["response_mime_type"] = "application/json"
             
-        response = model.generate_content(prompt, generation_config=generation_config)
+        config = types.GenerateContentConfig(**config_kwargs)
+            
+        response = client.models.generate_content(
+            model=model_name,
+            contents=prompt,
+            config=config
+        )
         text_response = response.text
         
         if expect_json:
             try:
                 # Clean up markdown code blocks if present
                 if text_response.startswith("```json"):
-                    text_response = text_response.replace("```json\\n", "").replace("\\n```", "")
+                    text_response = text_response.replace("```json\n", "").replace("\n```", "")
                 elif text_response.startswith("```"):
-                    text_response = text_response.replace("```\\n", "").replace("\\n```", "")
+                    text_response = text_response.replace("```\n", "").replace("\n```", "")
                     
                 return json.loads(text_response)
             except json.JSONDecodeError as e:
-                logger.error(f"JSON parsing error: {e}\\nRaw: {text_response}")
+                logger.error(f"JSON parsing error: {e}\nRaw: {text_response}")
                 return None
                 
         return text_response
